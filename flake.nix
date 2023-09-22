@@ -9,13 +9,13 @@
   };
 
   outputs = { self, nixpkgs, utils }:
-    utils.lib.eachDefaultSystem (system:
+    utils.lib.eachSystem [ "x86_64-linux" "x86_64-darwin" ] (system:
       let
         pkgs = import nixpkgs { inherit system; };
       in
-      {
+      rec {
 
-        packages.x86_64-linux.raxml = pkgs.stdenv.mkDerivation rec {
+        packages.default = pkgs.stdenv.mkDerivation rec {
           pname = "RAxML";
           version = "8.2.12";
 
@@ -26,6 +26,10 @@
             sha256 = "1jqjzhch0rips0vp04prvb8vmc20c5pdmsqn8knadcf91yy859fh";
           };
 
+          buildInputs = [
+            pkgs.gcc
+          ];
+
           buildPhase = ''
             make -f Makefile.AVX.PTHREADS.gcc
           '';
@@ -33,16 +37,7 @@
           installPhase = ''
             mkdir -p $out/bin && cp raxmlHPC-PTHREADS-AVX $out/bin
           '';
-
-          meta = {
-            description = "A tool for Phylogenetic Analysis and Post-Analysis of Large Phylogenies";
-            license = nixpkgs.lib.licenses.gpl3;
-            homepage = "https://sco.h-its.org/exelixis/web/software/raxml/";
-            platforms = [ "x86_64-linux" ];
-          };
         };
-
-        packages.x86_64-linux.default = self.packages.x86_64-linux.raxml;
 
       });
 }
