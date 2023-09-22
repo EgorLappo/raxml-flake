@@ -3,11 +3,15 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs?ref=nixpkgs-unstable";
+    utils = {
+      url = "github:numtide/flake-utils";
+    };
   };
 
-  outputs = { self, nixpkgs }:
-  let
-    pkgs = nixpkgs.legacyPackages.x86_64-linux;
+  outputs = { self, nixpkgs, utils }:
+  utils.lib.eachDefaultSystem (system:
+      let
+        pkgs = import nixpkgs { inherit system; };
   in {
 
     packages.x86_64-linux.raxml = pkgs.stdenv.mkDerivation rec {
@@ -39,5 +43,5 @@
 
     packages.x86_64-linux.default = self.packages.x86_64-linux.raxml;
 
-  };
+  });
 }
